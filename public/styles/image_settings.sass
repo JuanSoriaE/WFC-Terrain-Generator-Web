@@ -1,0 +1,55 @@
+$font-title: 18px
+$font-regular: 14px
+$font-small: 12px
+  
+$font-color-light: rgba(0, 0, 0, 0.5)
+
+#img-settings
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3)
+
+#img-settings-form
+  display: flex
+  flex-direction: column
+  gap: 20px
+  
+#dimensions-container
+  display: flex
+  justify-content: space-between
+
+  div
+    display: flex
+    align-items: center
+    gap: 10px
+
+    input[type="text"]
+      width: 48px
+
+#imgs-save-table
+  font-size: $font-regular
+  width: 100%
+  border-spacing: 5px
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1)
+  border-radius: 5px
+
+
+  thead
+    color: $font-color-light
+
+    th
+      font-weight: 600
+
+  tbody
+    font-weight: 100
+
+    tr
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1)
+
+      th
+        padding: 5px
+        font-weight: 500
+      
+      th:first-of-type
+        text-align-last: left
+      
+      .view-img-cell
+        cursor: pointer

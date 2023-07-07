@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/public/imgs/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WFC Heightmap Generator</title>
+    <link rel="stylesheet" href="/public/styles/style.sass">
+    <link rel="stylesheet" href="/public/styles/main.sass">
+    <link rel="stylesheet" href="/public/styles/wfc_params.sass">
+    <link rel="stylesheet" href="/public/styles/states_settings.sass">
+    <link rel="stylesheet" href="/public/styles/image_settings.sass">
+    <link rel="stylesheet" href="/public/styles/mid_panel.sass">
+    <link rel="stylesheet" href="/public/styles/imgs-modal.sass">
+    <link rel="stylesheet" href="/public/styles/D3_settings.sass">
+  </head>
+  <body>
+    <div id="left-panel">
+      <section id="wfc-params">
+        <h2>WFC PARAMETERS</h2>
+        <div id="wfc-params-form">
+          <div id="ini-states-container">
+            <div class="lbl-inp-container">
+              <label for="ini-states" class="inp-lbl">Initial States:</label>
+              <input type="text" id="ini-states" value="5">
+            </div>
+            <div id="auto-ini-states-container">
+              <label for="auto-ini-states" class="small-lbl">Auto</label>
+              <input type="checkbox" id="auto-ini-states" checked>
+            </div>
+          </div>
+          <div id="rows-cols-container">
+            <div>
+              <label for="wfc-rows" class="inp-lbl">Rows:</label>
+              <input type="text" id="wfc-rows" value="50">
+            </div>
+            <div>
+              <label for="wfc-cols" class="inp-lbl">Columns:</label>
+              <input type="text" id="wfc-cols" value="50">
+            </div>
+          </div>
+          <div id="ini-cell-container">
+            <div>
+              <label for="ini-cell" class="inp-lbl">Initial Cell:</label>
+              <input type="text" id="ini-cell" value="0,0">
+            </div>
+            <div>
+              <label for="ini-state" class="inp-lbl">State:</label>
+              <input type="text" id="ini-state" value="">
+            </div>
+          </div>
+          <div id="neighbors-based-container">
+            <label for="neighbors-based" class="inp-lbl">Neighbors Based</label>
+            <input type="checkbox" id="neighbors-based">
+          </div>
+        </div>
+      </section>
+      <section id="states-settings">
+        <h2>STATES SETTINGS</h2>
+        <div id="auto-states-colors-container">
+          <label for="auto-states-colors" class="small-lbl">Auto</label>
+          <input type="checkbox" id="auto-states-colors" checked>
+        </div>
+        <div id="reload-states-button-container">
+          <button id="reload-states-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
+          </button>
+        </div>
+        <div id="settings-table">
+          <div class="table-header">
+            <div style="width: 50px;">State</div>
+            <div style="width: 150px;">Adjacents</div>
+            <div style="width: 90px;">Color</div>
+          </div>
+          <div class="table-body" id="settings-table-body">
+          </div>
+        </div>
+      </section>
+    </div>
+    <div id="mid-panel">
+      <div id="generate-button-container">
+        <button id="generate-button" class="main-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe-americas" viewBox="0 0 16 16">
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
+          </svg>
+          <span>Generate!</span>
+        </button>
+      </div>
+      <div id="loading-modal-container" style="display: none;">
+        <div id="loading-modal-content">
+          <img src="./public/imgs/loading-gif.gif" alt="Loading gif">
+          <h3 id="loading-modal-text">Generating</h3>
+        </div>
+      </div>
+    </div>
+    <div id="right-panel">
+      <section id="img-settings">
+        <h2>IMAGES SETTINGS</h2>
+        <div id="img-settings-form">
+          <div id="dimensions-container">
+            <div>
+              <label for="img-width" class="inp-lbl">Width:</label>
+              <input type="text" id="img-width" value="200">
+            </div>
+            <div>
+              <label for="img-height" class="inp-lbl">Height:</label>
+              <input type="text" id="img-height" value="200">
+            </div>
+          </div>
+          <div>
+            <table id="imgs-save-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Show</th>
+                  <th>Save</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <div class="lbl-inp-container">
+            <label for="imgs-name" class="inp-lbl">Image Name:</label>
+            <input type="text" id="imgs-name" value="heightmap-1">
+          </div>
+          <button class="main-button">Save</button>
+        </div>
+      </section>
+      <section id="d3-view-settings">
+        <h2>3D SETTINGS</h2>
+        <div id="d3-settings-form">
+          <div id="d3-map-texture-container">
+            <label for="d3-map-texture" class="inp-lbl">Texture:</label>
+            <select id="d3-map-texture">
+              <option value="color-grid">Color Grid</option>
+              <option value="color-smooth" selected>Color Smooth</option>
+              <option value="gray-grid">Gray Grid</option>
+              <option value="gray-smooth">Gray Smooth</option>
+              <option value="wireframe">Wireframe</option>
+            </select>
+          </div>
+          <div class="lbl-inp-container">
+            <label for="height-scale" class="inp-lbl">Height Scale:</label>
+            <div class="range-right-bound-container">
+              <span class="inp-lbl">0</span>
+              <input type="range" id="height-scale" min="0" max="1" step="0.02" value="1">
+              <input type="text" id="height-scale-right-bound" value="10">
+            </div>
+          </div>
+        </div>
+        
+      </section>
+    </div>
+    <div id="img-modal-container" style="display: none;">
+      <div id="img-modal-content">
+        <div id="img-modal-close-btn-container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </div>
+        <div id="img-modal-header">
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
+              <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+              <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
+          </div>
+          <div id="img-modal-header-txt-container">
+            <h3 id="img-modal-title">Color Heightmap Grid Image</h3>
+            <span id="img-modal-description">Created usign the colors of STATES SETTINGS: 200 x 200px</span>
+          </div>
+        </div>
+        <div id="img-modal-img-container">
+          <img id="img-modal-img" src="./public/imgs/havent-generated.svg" alt="">
+        </div>
+        <div id="img-modal-buttons-container">
+          <button class="sec-button" id="img-modal-cancel-btn">CANCEL</button>
+          <button class="main-button">SAVE</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

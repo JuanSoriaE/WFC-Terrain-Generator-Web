@@ -1,0 +1,147 @@
+$font-title: 18px
+$font-regular: 14px
+$font-small: 12px
+
+$font-color-title: rgba(0, 0, 0, 0.4)
+$font-color-light: rgba(0, 0, 0, 0.5)
+
+$main-color: #5F7ADB
+$main-color-trans: rgba(95, 122, 219, 0.3)
+
+:root
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif
+  font-weight: 400
+
+  font-synthesis: none
+  text-rendering: optimizeLegibility
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  -webkit-text-size-adjust: 100%
+
+body
+  margin: 0
+
+*
+  box-sizing: border-box
+
+.inp-lbl
+  font-size: $font-regular
+
+input[type="text"]
+  all: unset
+  font-size: $font-regular
+  padding: 4px 10px
+  border-radius: 5px
+  border: 1px solid rgba(0, 0, 0, 0.3)
+
+input[type="checkbox"]
+  width: 20px
+  height: 20px
+  cursor: pointer
+
+input[type="color"]
+  width: 30px
+  height: 30px
+  padding: 0
+  background-color: transparent
+  border: none
+  cursor: pointer
+
+input[type="range"]
+  height: 4px
+
+input[type="range"]:hover
+  cursor: pointer
+
+input[type="range"]:focus
+  outline: none
+
+input[type=range]::-webkit-slider-thumb
+  border-radius: 8px
+
+input[type="range"]::-webkit-slider-thumb:active
+  outline: 3px solid $main-color-trans
+
+
+select
+  all: unset
+  font-size: $font-regular
+  padding: 4px 10px
+  border-radius: 5px
+  border: 1px solid rgba(0, 0, 0, 0.3)
+  cursor: pointer
+  background: url(../imgs/down-arrow.svg) no-repeat right center
+
+.main-button
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 10px 20px
+  border-radius: 5px
+  border: none
+  background-color: $main-color
+  color: #fff
+  font-weight: 600
+  cursor: pointer
+  font-size: $font-regular
+  transition: scale 0.2s
+
+.sec-button
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 10px 20px
+  border-radius: 5px
+  border: 1px solid rgba(0, 0, 0, 0.2)
+  color: rgba(0, 0, 0, 0.6)
+  font-weight: 600
+  cursor: pointer
+  font-size: $font-regular
+  transition: scale 0.2s
+
+.main-button:active, .sec-button:active
+  scale: 0.97
+
+input:focus, button:focus, select:focus
+  outline: 3px solid $main-color-trans
+
+h2
+  font-size: $font-title
+  margin: 0
+  color: $font-color-title
+
+.small-lbl
+  font-size: $font-small
+  color: $font-color-light
+
+.range-right-bound-container
+  display: flex
+  align-items: center
+  gap: 10px
+
+  input[type="range"]
+    flex-grow: 1
+
+  input[type="text"]
+    width: 23px
+
+/* Target the entire scrollbar */
+::-webkit-scrollbar
+  width: 5px
+
+/* Track (the background of the scrollbar) */
+::-webkit-scrollbar-track
+  background-color: #ddd
+
+/* Handle (the draggable part of the scrollbar) */
+::-webkit-scrollbar-thumb
+  background-color: #aaa
+  border-radius: 2px
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover
+  background-color: #aaa
+
+/* Corner (the junction between vertical and horizontal scrollbar) */
+::-webkit-scrollbar-corner
+  background-color: #fff

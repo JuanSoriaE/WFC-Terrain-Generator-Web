@@ -1,0 +1,148 @@
+$main-color: #5F7ADB
+$main-color-trans: rgba(95, 122, 219, 0.3)
+
+#states-settings
+  padding: 15px
+  position: relative
+  overflow-y: auto
+  
+#states-settings-form
+  display: flex
+  flex-direction: column
+  gap: 10px
+
+.state-settings-container
+  display: flex
+  width: 100%
+  justify-content: space-between
+
+  div
+    display: flex
+    gap: 5px
+    align-items: center
+  
+  .adj-settings
+    input[type="text"]
+      width: 128px
+  
+  .color-settings
+    input[type="text"]
+      width: 48px
+
+#auto-states-colors-container
+  position: absolute
+  top: 10px
+  right: 41px
+  display: flex
+  flex-direction: column
+  justify-content: center
+  align-items: center
+
+  input[type="checkbox"]
+    width: 15px
+    height: 15px
+
+#reload-states-button-container
+  position: absolute
+  top: 15px
+  right: 15px
+
+  button
+    all: unset
+    display: flex
+    justify-content: center
+    align-items: center
+    cursor: pointer
+    padding: 5px
+
+    svg
+      color: #888
+
+#settings-table
+  width: 100%
+  border: 1px solid rgba(0, 0, 0, 0.1)
+
+
+  .table-header
+    display: flex
+    background-color: rgba(0, 0, 0, 0.1)
+
+    div
+      padding: 6px
+      font-weight: 600
+      color: rgba(0, 0, 0, 0.6)
+      text-align: center
+    
+    div:not(:last-of-type)
+      border-right: 1px solid rgba(0, 0, 0, 0.2)
+    
+  .table-body
+    .table-row
+      width: 100%
+      display: flex
+      height: 33px
+
+      .table-cell
+        input[type="text"]
+          width: calc(100% - 20px)
+          border: none
+          border-radius: 0
+        
+        input[type="text"]:focus
+          outline: none
+      
+      .table-cell:not(:last-of-type)
+        border-right: 1px solid rgba(0, 0, 0, 0.2)
+        
+      .table-cell.inp
+        transition: box-shadow 0.1s
+
+      .table-cell.inp:hover
+        box-shadow: 0 0 0 4px $main-color-trans
+
+      input[type="text"]:hover
+        ~ .table-cell
+          background-color: red
+
+      .table-cell.state
+        padding: 6px 5px
+        width: 50px
+        overflow: hidden
+        text-overflow: ellipsis
+      
+      .table-cell.adj
+        width: 150px
+
+        input[type="text"]
+          height: 33px - 8px
+
+      .table-cell.color
+        width: 90px
+        display: flex
+
+        input[type="text"]:focus
+          outline: none
+        
+        .cell-color-div
+          width: 25px
+          padding: 5px
+          display: flex
+          align-items: center
+          
+          .color-inp-container
+            width: 15px
+            height: 15px
+            position: relative
+            overflow: hidden
+            border: 1px solid rgba(0, 0, 0, 0.3)
+            border-radius: 3px
+
+            input[type="color"]
+              position: absolute
+              left: -5px
+              top: -5px
+              width: 25px
+              height: 25px
+    
+    .table-row:not(:last-of-type)
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1)
