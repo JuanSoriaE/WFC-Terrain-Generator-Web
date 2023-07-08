@@ -53,16 +53,19 @@ export default class Generator {
   _imgs: Map<string, HeightmapImage>;
 
   // HTML ELEMENTS
-  ini_state_inp: HTMLInputElement = document.getElementById("ini-states") as HTMLInputElement;
+  ini_states_inp: HTMLInputElement = document.getElementById("ini-states") as HTMLInputElement;
   auto_ini_states: HTMLInputElement = document.getElementById("auto-ini-states") as HTMLInputElement;
   states_settings_table_body: HTMLDivElement = document.getElementById("settings-table-body") as HTMLDivElement;
   rows_inp: HTMLInputElement = document.getElementById("wfc-rows") as HTMLInputElement;
   cols_inp: HTMLInputElement = document.getElementById("wfc-cols") as HTMLInputElement;
   ini_cell_inp: HTMLInputElement = document.getElementById("ini-cell") as HTMLInputElement;
+  ini_state_inp: HTMLInputElement = document.getElementById("ini-state") as HTMLInputElement;
   neighbors_based_inp: HTMLInputElement = document.getElementById("neighbors-based") as HTMLInputElement;
   auto_states_color: HTMLInputElement = document.getElementById("auto-states-colors") as HTMLInputElement;
   color_inps: NodeListOf<HTMLInputElement> = document.querySelectorAll(`input[type="color"]`);
   imgs_table_body: HTMLElement = document.querySelector("#imgs-save-table tbody") as HTMLElement;
+
+  reload_states_button: HTMLButtonElement = document.getElementById("reload-states-button") as HTMLButtonElement;
 
   generate_button: HTMLButtonElement = document.getElementById("generate-button") as HTMLButtonElement;
 
@@ -114,19 +117,21 @@ export default class Generator {
         .split(",")
         .map(cell => Number(cell.trim()))
       : this._ini_cell;
-    
-    this._ini_state = this._ini_state != "" ? this.ini_state_inp.value : this._ini_state;
+
+    this._ini_state = this.ini_state_inp.value;
     
     for (const state of this._states) {
       const state_adj_list: Array<string> = 
+      
         (document.getElementById(`state-${state}-adj`) as HTMLInputElement)
         .value
+        
         .split(",")
         .map(adj_state => adj_state.trim());
       
       adj_list.set(state, new Set(state_adj_list));
     }
-
+    
     const res: Array<Array<Set<string>>> = await WFC(
       this._states,
       this._rows,
@@ -135,6 +140,9 @@ export default class Generator {
       this._ini_cell,
       this._ini_state,
     );
+
+    console.log({states: this._states, ini_state: this._ini_state, res});
+    
 
     this._mat = new Array<Array<string>>(this._rows);
     
@@ -145,16 +153,25 @@ export default class Generator {
       }
     }
 
+    
     this._imgs.forEach((img, img_id) => {
       img.setMat = this._mat;
+      if (!img_id.includes("gray")) {
+        const colors_arr: Array<RGB> = getHTMLColors(
+          document.querySelectorAll(`input[type="color"]`)
+        );
+
+        const colors: Map<string, RGB> = new Map<string, RGB>();
+        for (let i: number = 0; i < this._states.length; i++)
+          colors.set(this._states[i], colors_arr[i]);
+        
+        img.setColors = colors;
+      }
       img.createImage(this._cols, this._rows);
     });
 
     this._map_visualization.clearScene();
-    if (this.map_texture_select.value == "wireframe")
-      this._map_visualization.setWireframeTexture = true;
-    else
-      this._map_visualization.setWireframeTexture = false;
+    this._map_visualization.setWireframeTexture = this.map_texture_select.value === "wireframe";
     
     await this._map_visualization.createGround(
       (this._imgs.get("gray-smooth") as HeightmapImage).getSrc(),
@@ -163,76 +180,104 @@ export default class Generator {
     this._map_visualization.reRender();
   }
 
+  reloadStates(): void {
+    this._initStates();
+    this.updateImagesColors();
+    this._initStatesInputs();
+  }
+
+  updateImagesColors(): void {
+    this._imgs.forEach((img, key) => {
+      let colors_arr: Array<RGB> = new Array<RGB>(this._states.length);
+
+      if (key.includes("gray")) colors_arr = getAutoGrayColors(this._states.length);
+      else if (this.auto_states_color.checked) 
+        colors_arr = getAutoColors(this._states.length, this.color_inps);
+      else colors_arr.fill({r: 0, g: 0, b: 0});
+      const colors: Map<string, RGB> = new Map<string, RGB>();
+      
+      for (let i: number = 0; i < this._states.length; i++) {
+        colors.set(this._states[i], colors_arr[i]);
+      }
+
+      img.setColors = colors;
+    });
+  }
+
   _initStates(): void {
+    this._states = new Array<string>();
+
     for (
       let i: number = 1;
-      this.auto_ini_states.checked && i <= Number(this.ini_state_inp.value);
+      this.auto_ini_states.checked && i <= Number(this.ini_states_inp.value);
       i++
     ) {
       this._states.push(i.toString());
     }
 
+    
     if (!this.auto_ini_states.checked) {
-      this._states = this.ini_state_inp.value.split(",").map(state => state.trim());
+      this._states = this.ini_states_inp.value.split(",").map(state => state.trim());
     }
   }
 
   _initStatesInputs(): void {
     this.states_settings_table_body.innerHTML = "";
-
-  for (let i: number = 0; i < this._states.length; i++) {
-    const state: string = this._states[i];
-    const adj_vals_arr: Array<string> = [];
     
-    for (let j: number = -1; j < 2; j++) {
-      if (i + j >= 0 && i + j < this._states.length) adj_vals_arr.push(this._states[i + j]);
-    }
 
-    const color_val: string = RGBToHex(this._imgs.get("color-grid")?._colors.get(state) as RGB);
-    const new_ele_str: string = `
-      <div class="table-row">
-        <div class="table-cell state">${state}</div>
-        <div class="table-cell adj inp table-cell-state-${state}-adj">
-          <input type="text" id="state-${state}-adj" value="${adj_vals_arr.join()}">
-        </div>
-        <div class="table-cell color inp table-cell-state-${state}-color table-cell-state-${state}-color-hex">
-          <input type="text" id="state-${state}-color-hex">
-          <div class="cell-color-div">
-            <div class="color-inp-container">
-              <input type="color" id="state-${state}-color" value="${color_val}">
+    for (let i: number = 0; i < this._states.length; i++) {
+      const state: string = this._states[i];
+      const adj_vals_arr: Array<string> = [];
+      
+      for (let j: number = -1; j < 2; j++) {
+        if (i + j >= 0 && i + j < this._states.length) adj_vals_arr.push(this._states[i + j]);
+      }
+
+      const color_val: string = RGBToHex(this._imgs.get("color-grid")?._colors.get(state) as RGB);
+      const new_ele_str: string = `
+        <div class="table-row">
+          <div class="table-cell state">${state}</div>
+          <div class="table-cell adj inp table-cell-state-${state}-adj">
+            <input type="text" id="state-${state}-adj" value="${adj_vals_arr.join()}">
+          </div>
+          <div class="table-cell color inp table-cell-state-${state}-color table-cell-state-${state}-color-hex">
+            <input type="text" id="state-${state}-color-hex">
+            <div class="cell-color-div">
+              <div class="color-inp-container">
+                <input type="color" id="state-${state}-color" value="${color_val}">
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `;
-    
+      `;
+      
 
-    const temp_ele: HTMLDivElement = document.createElement("div");
-    temp_ele.innerHTML = new_ele_str;
+      const temp_ele: HTMLDivElement = document.createElement("div");
+      temp_ele.innerHTML = new_ele_str;
 
-    const new_ele: HTMLDivElement = temp_ele.querySelector(".table-row") as HTMLDivElement;
-    const color_ele: HTMLInputElement = new_ele.querySelector(`#state-${state}-color`) as HTMLInputElement;
-    const hex_ele: HTMLInputElement = new_ele.querySelector(`#state-${state}-color-hex`) as HTMLInputElement;
+      const new_ele: HTMLDivElement = temp_ele.querySelector(".table-row") as HTMLDivElement;
+      const color_ele: HTMLInputElement = new_ele.querySelector(`#state-${state}-color`) as HTMLInputElement;
+      const hex_ele: HTMLInputElement = new_ele.querySelector(`#state-${state}-color-hex`) as HTMLInputElement;
 
-    color_ele.addEventListener("change", setColorValues);
-    hex_ele.addEventListener("change", setColorValues);
-    hex_ele.value = color_ele.value.slice(1);
-    
-    this.states_settings_table_body.appendChild(new_ele);
-    
-    const adj_inp: HTMLInputElement = new_ele.querySelector(`#state-${state}-adj`) as HTMLInputElement;
-    const color_inp: HTMLInputElement = new_ele.querySelector(`#state-${state}-color`) as HTMLInputElement;
-    const color_inp_hex: HTMLInputElement = new_ele.querySelector(`#state-${state}-color-hex`) as HTMLInputElement;
+      color_ele.addEventListener("change", setColorValues);
+      hex_ele.addEventListener("change", setColorValues);
+      hex_ele.value = color_ele.value.slice(1);
+      
+      this.states_settings_table_body.appendChild(new_ele);
+      
+      const adj_inp: HTMLInputElement = new_ele.querySelector(`#state-${state}-adj`) as HTMLInputElement;
+      const color_inp: HTMLInputElement = new_ele.querySelector(`#state-${state}-color`) as HTMLInputElement;
+      const color_inp_hex: HTMLInputElement = new_ele.querySelector(`#state-${state}-color-hex`) as HTMLInputElement;
 
-    [adj_inp, color_inp, color_inp_hex].forEach(ele => {
-      ele.addEventListener("focus", this.handleInputFocusTable);
-      ele.addEventListener("keydown", e => this.handleMoveDown(e, i, this._states));
-    });
+      [adj_inp, color_inp, color_inp_hex].forEach(ele => {
+        ele.addEventListener("focus", this.handleInputFocusTable);
+        ele.addEventListener("keydown", e => this.handleMoveDown(e, i, this._states));
+      });
 
-    [adj_inp, color_inp, color_inp_hex].forEach(ele => {
-      ele.addEventListener("focusout", this.handleInputFocusoutTable);
-    });
-  }
+      [adj_inp, color_inp, color_inp_hex].forEach(ele => {
+        ele.addEventListener("focusout", this.handleInputFocusoutTable);
+      });
+    }
   }
 
   _initImages(): void {
@@ -331,10 +376,8 @@ export default class Generator {
 
   async handleChangeMapTexture(e: Event) {
     this._map_visualization.clearScene();
-    if (this.map_texture_select.value == "wireframe")
-      this._map_visualization.setWireframeTexture = true;
-    else
-      this._map_visualization.setWireframeTexture = false;
+    this._map_visualization.setWireframeTexture =
+      this.map_texture_select.value === "wireframe";
     
     await this._map_visualization.createGround(
       (this._imgs.get("gray-smooth") as HeightmapImage).getSrc(),
@@ -351,12 +394,7 @@ export default class Generator {
 
     this._map_visualization._displacement_scale = Number(this.height_scale_inp.value);
 
-    const heightmap_url: string = (this._imgs.get("gray-smooth") as HeightmapImage)?.getSrc();
-    this._map_visualization.clearScene();
-    await this._map_visualization.createGround(heightmap_url, 
-      (this._imgs.get(this.map_texture_select.value) as HeightmapImage)?.getSrc() || ""
-    );
-    this._map_visualization.reRender();
+    this._map_visualization.updateScale();
   }
 
   storeClickPos(e: MouseEvent) {
@@ -367,14 +405,21 @@ export default class Generator {
 
   handleMouseMove(e: MouseEvent) {
     if (!this._visualization_hold_click) return;
-    
+
     const delta_x: number = e.clientX - this._visualization_click_x;
     const delta_y: number = e.clientY - this._visualization_click_y;
     this._visualization_click_x = e.clientX;
     this._visualization_click_y = e.clientY;
-
-    // Rotate PI (90 deg) every 500px
-    this._map_visualization.rotate((Math.PI / 2) * (delta_x / 500));
+    
+    if (e.which === 1) {
+      // Rotate PI/2 (90 deg) every 500px
+      this._map_visualization.rotate((Math.PI / 2) * (delta_x / 500));
+  
+      // Move around vertically PI/2 (90 deg) every 500px
+      this._map_visualization.moveAroundVertical((Math.PI / 2) * (delta_y / 500));
+    } else {
+      this._map_visualization.zoom(delta_y / 2);
+    }
   }
 
   handleMouseUp(e: MouseEvent) {
@@ -383,8 +428,11 @@ export default class Generator {
 
   _initEventListeners() {
     this.generate_button.addEventListener("click", e => this.generate());
+    this.reload_states_button.addEventListener("click", e => this.reloadStates());
+
     document.getElementById("img-modal-close-btn-container")?.addEventListener("click", e => this.handleCloseModal(e));
     document.getElementById("img-modal-cancel-btn")?.addEventListener("click", e => this.handleCloseModal(e));
+    
     this.map_texture_select.addEventListener("change", e => this.handleChangeMapTexture(e));
     this.height_scale_inp.addEventListener("input", e => this.handleHeightScaleChange(e));
     this.height_scale_right_bound.addEventListener("keypress", e => this.handleHeightScaleChange(e));
@@ -392,5 +440,8 @@ export default class Generator {
     this.rendering_cnv.addEventListener("mousedown", e => this.storeClickPos(e));
     this.rendering_cnv.addEventListener("mousemove", e => this.handleMouseMove(e));
     this.rendering_cnv.addEventListener("mouseup", e => this.handleMouseUp(e));
+
+    this.rendering_cnv.addEventListener("mousedown", e => this.storeClickPos(e));
+    this.rendering_cnv.addEventListener("contextmenu", e => e.preventDefault());
   }
 }

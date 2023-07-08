@@ -47,17 +47,21 @@ export default class HeightmapImage {
     return this._description;
   }
   
-  set setMat(v : Array<Array<string>>) {
-    this._mat = v;
+  set setMat(mat: Array<Array<string>>) {
+    this._mat = mat;
     this.N = this._mat.length;
     this.M = this._mat[0].length;
+  }
+
+  set setColors(colors: Map<string, RGB>) {
+    this._colors = colors;
   }
 
   createImage(w: number, h: number): void {
     const ALPHA: number = 255;
     const buffer_len: number = this.N * this.M * 4;
     const buffer: Uint8ClampedArray = new Uint8ClampedArray(buffer_len);
-
+    
     for (let row: number = 0; row < this.N; row++) {
       for (let col: number = 0; col < this.M; col++) {
         let buffer_pos: number = (row * this.M + col) * 4;

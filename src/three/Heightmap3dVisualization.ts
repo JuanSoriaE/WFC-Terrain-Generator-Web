@@ -8,9 +8,17 @@ export default class Heightmap3dVisualization {
   _scene: THREE.Scene;
   _renderer: THREE.WebGLRenderer;
 
+  _ground_mat: THREE.MeshStandardMaterial;
+
   _wireframe_texture: boolean;
   _max_dis_scale: number = 10;
   _displacement_scale: number = 1;
+
+  _angle: number = Math.PI / 5;
+  _radius: number = Math.sqrt(
+    Math.pow(40, 2) +
+    Math.pow(80, 2)
+  );
   
   static FOV: number = 65;
   static NEAR: number = 1.0;
@@ -27,8 +35,11 @@ export default class Heightmap3dVisualization {
       Heightmap3dVisualization.NEAR,
       Heightmap3dVisualization.FAR
     );
-      this._camera.position.set(0, 50, 80);
-      this._camera.rotation.x = -Math.PI / 5;
+      this._camera.position.set(0, 
+        this._radius * Math.sin(this._angle),
+        this._radius * Math.cos(this._angle)
+      );
+      this._camera.rotation.x = -this._angle;
     
     this._scene = new THREE.Scene();
       this._scene.background = new THREE.Color(0xccceca);
@@ -40,6 +51,8 @@ export default class Heightmap3dVisualization {
     
     this._renderer.domElement.id = "rendering-cnvs";
     this._mid_panel.appendChild(this._renderer.domElement);
+
+    this._ground_mat = new THREE.MeshStandardMaterial();
   }
 
   set setWireframeTexture(v: boolean) {
@@ -79,7 +92,7 @@ export default class Heightmap3dVisualization {
       color_map = await new THREE.TextureLoader()
         .loadAsync(texture_url);
 
-    const ground_mat: THREE.MeshStandardMaterial = new THREE.MeshStandardMaterial({
+    this._ground_mat = new THREE.MeshStandardMaterial({
       color: this._wireframe_texture ? 0x000000 : undefined,
       wireframe: this._wireframe_texture,
       displacementMap: dis_map,
@@ -88,7 +101,7 @@ export default class Heightmap3dVisualization {
       lightMapIntensity: 0.7,
     });
 
-    const ground_mesh: THREE.Mesh = new THREE.Mesh(ground_geo, ground_mat);
+    const ground_mesh: THREE.Mesh = new THREE.Mesh(ground_geo, this._ground_mat);
 
     this._scene.add(ground_mesh);
 
@@ -121,18 +134,28 @@ export default class Heightmap3dVisualization {
     this.render();
   }
 
+  updateScale(): void {
+    this._ground_mat.displacementScale = this._displacement_scale * this._max_dis_scale;
+  }
+
   rotate(angle: number): void {
     const ratio: number = 1.5;
 
     this._scene.rotateY(angle * ratio);
   }
 
-  zoom(v: number): void {
-    const y_ratio: number = 0.5;
-    const ratio: number = 3;
+  moveAroundVertical(angle: number): void {
+    // Update y and z camera coords, and camera angle
+    this._angle = Math.min(Math.PI / 2, Math.max(0, this._angle + angle));
+    this._camera.position.y = this._radius * Math.sin(this._angle);
+    this._camera.position.z = this._radius * Math.cos(this._angle);
+    this._camera.rotation.x = -this._angle;
+  }
 
-    this._camera.position.z += v * ratio;
-    this._camera.position.y += v * y_ratio * ratio;
+  zoom(v: number): void {
+    this._radius = Math.min(200, Math.max(10, this._radius + v));
+    this._camera.position.y = this._radius * Math.sin(this._angle);
+    this._camera.position.z = this._radius * Math.cos(this._angle);
   }
 
   resize(): void {

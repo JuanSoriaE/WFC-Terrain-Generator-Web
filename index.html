@@ -57,10 +57,10 @@
       </section>
       <section id="states-settings">
         <h2>STATES SETTINGS</h2>
-        <div id="auto-states-colors-container">
+        <!-- <div id="auto-states-colors-container">
           <label for="auto-states-colors" class="small-lbl">Auto</label>
           <input type="checkbox" id="auto-states-colors" checked>
-        </div>
+        </div> -->
         <div id="reload-states-button-container">
           <button id="reload-states-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
@@ -73,7 +73,13 @@
           <div class="table-header">
             <div style="width: 50px;">State</div>
             <div style="width: 150px;">Adjacents</div>
-            <div style="width: 90px;">Color</div>
+            <div style="width: 90px;" id="table-header-color">
+              Color
+              <div id="auto-states-colors-container">
+                <label for="auto-states-colors" class="small-lbl">Auto</label>
+                <input type="checkbox" id="auto-states-colors" checked>
+              </div>
+            </div>
           </div>
           <div class="table-body" id="settings-table-body">
           </div>

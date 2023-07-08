@@ -30,8 +30,11 @@ function prebuild() {
   // Heap
   //       entropy          r            c
   hp.push([states.size - 1, ini_cell[0], ini_cell[1]]);
-  if (ini_state != "")
+  if (ini_state !== "") {
+    console.log("In WFC: " + ini_state);
+    
     grid[ini_cell[0]][ini_cell[1]] = new Set<string>([ini_state]);
+  }
 }
 
 function propagate(r: number, c: number) {

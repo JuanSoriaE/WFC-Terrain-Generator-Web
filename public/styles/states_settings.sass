@@ -30,17 +30,14 @@ $main-color-trans: rgba(95, 122, 219, 0.3)
       width: 48px
 
 #auto-states-colors-container
-  position: absolute
-  top: 10px
-  right: 41px
   display: flex
   flex-direction: column
   justify-content: center
   align-items: center
 
   input[type="checkbox"]
-    width: 15px
-    height: 15px
+    width: 10px
+    height: 10px
 
 #reload-states-button-container
   position: absolute
@@ -67,14 +64,23 @@ $main-color-trans: rgba(95, 122, 219, 0.3)
     display: flex
     background-color: rgba(0, 0, 0, 0.1)
 
-    div
+    >div
       padding: 6px
       font-weight: 600
       color: rgba(0, 0, 0, 0.6)
       text-align: center
+      display: flex
+      align-items: center
     
-    div:not(:last-of-type)
+    >div:not(:last-of-type)
       border-right: 1px solid rgba(0, 0, 0, 0.2)
+    
+    #table-header-color
+      justify-content: space-between
+
+      label
+        font-size: 10px
+
     
   .table-body
     .table-row
