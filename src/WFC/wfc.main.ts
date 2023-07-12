@@ -31,8 +31,6 @@ function prebuild() {
   //       entropy          r            c
   hp.push([states.size - 1, ini_cell[0], ini_cell[1]]);
   if (ini_state !== "") {
-    console.log("In WFC: " + ini_state);
-    
     grid[ini_cell[0]][ini_cell[1]] = new Set<string>([ini_state]);
   }
 }
@@ -127,16 +125,10 @@ function WFC(
   neigh_based = neighbors_based;
   adj_offs = adj_offs_param;
   adj_list = adj_list_param;
-  console.time("WFC prebuild");
+
   prebuild();
-  console.timeEnd("WFC prebuild");
 
-  console.time("WFC performe");
   performeWFC();
-  console.timeEnd("WFC performe");
-
-  console.log("WFC Time to propagate: " + time_to_prop);
-  
 
   return grid;
 }

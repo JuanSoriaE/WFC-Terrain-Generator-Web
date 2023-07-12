@@ -78,8 +78,6 @@ export default class Heightmap3dVisualization {
       w, h,
       w_segments, h_segments
     );
-    console.log({hm_url, texture_url});
-    
     
     const dis_map = await new THREE.TextureLoader()
       .loadAsync(hm_url);

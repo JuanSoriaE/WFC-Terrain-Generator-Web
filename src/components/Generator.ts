@@ -52,6 +52,8 @@ export default class Generator {
   _map_visualization: Heightmap3dVisualization;
   _imgs: Map<string, HeightmapImage>;
 
+  _modal_img_id: string;
+
   // HTML ELEMENTS
   ini_states_inp: HTMLInputElement = document.getElementById("ini-states") as HTMLInputElement;
   auto_ini_states: HTMLInputElement = document.getElementById("auto-ini-states") as HTMLInputElement;
@@ -77,6 +79,10 @@ export default class Generator {
   modal_title: HTMLHeadingElement = document.getElementById("img-modal-title") as HTMLHeadingElement;
   modal_desc: HTMLSpanElement = document.getElementById("img-modal-description") as HTMLSpanElement;
   modal_img: HTMLImageElement = document.getElementById("img-modal-img") as HTMLImageElement;
+  moda_img_save_button: HTMLButtonElement = document.getElementById("img-modal-save-btn") as HTMLButtonElement;
+
+  imgs_width_inp: HTMLInputElement = document.getElementById("img-width") as HTMLInputElement;
+  imgs_height_inp: HTMLInputElement = document.getElementById("img-height") as HTMLInputElement;
   save_imgs_button: HTMLButtonElement = document.getElementById("save-images-button") as HTMLButtonElement;
 
   rendering_cnv: HTMLCanvasElement;
@@ -101,6 +107,8 @@ export default class Generator {
     this._ini_state = this._states[0];
 
     this._mat = new Array<Array<string>>();
+
+    this._modal_img_id = "";
 
     this._initStatesInputs();
     this._initImagesHTMLElements();
@@ -142,9 +150,6 @@ export default class Generator {
       this._ini_state,
     );
 
-    console.log({states: this._states, ini_state: this._ini_state, res});
-    
-
     this._mat = new Array<Array<string>>(this._rows);
     
     for (let r: number = 0; r < this._rows; r++) {
@@ -168,7 +173,10 @@ export default class Generator {
         
         img.setColors = colors;
       }
-      img.createImage(this._cols, this._rows);
+
+      const w: number = this.imgs_width_inp.value ? +this.imgs_width_inp.value : this._cols;
+      const h: number = this.imgs_height_inp.value ? +this.imgs_height_inp.value : this._rows;
+      img.createImage(w, h);
     });
 
     this._map_visualization.clearScene();
@@ -365,6 +373,7 @@ export default class Generator {
 
   handleViewImageClick(e: Event, img_id: string) {
     const img: HeightmapImage = this._imgs.get(img_id) as HeightmapImage;
+    this._modal_img_id = img_id;
     this.modal_title.textContent = img.getTitle();
     this.modal_desc.textContent = img.getDescripcion();
     this.modal_img.src = img.getSrc();
@@ -436,6 +445,11 @@ export default class Generator {
       return;
     }
 
+    if ((e.target as HTMLElement).id === "img-modal-save-btn") {
+      this._imgs.get(this._modal_img_id)?.saveImage(filename);
+      return;
+    }
+
     this._imgs.forEach((img, key) => {
       const checkbox: HTMLInputElement = document.getElementById(`${key}-img-check`) as HTMLInputElement;
       if (!checkbox.checked) return;
@@ -462,5 +476,6 @@ export default class Generator {
     this.rendering_cnv.addEventListener("contextmenu", e => e.preventDefault());
 
     this.save_imgs_button.addEventListener("click", e => this.saveImages(e));
+    this.moda_img_save_button.addEventListener("click", e => this.saveImages(e));
   }
 }

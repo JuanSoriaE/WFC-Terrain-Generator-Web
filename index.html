@@ -109,11 +109,13 @@
           <div id="dimensions-container">
             <div>
               <label for="img-width" class="inp-lbl">Width:</label>
-              <input type="text" id="img-width" value="200">
+              <input type="text" id="img-width">
+              <span class="input-info-message" id="img-width-info">The Width should be multiple of Columns.</span>
             </div>
             <div>
               <label for="img-height" class="inp-lbl">Height:</label>
-              <input type="text" id="img-height" value="200">
+              <input type="text" id="img-height">
+              <span class="input-info-message" id="img-height-info">The Height should be multiple of Rows.</span>
             </div>
           </div>
           <div>
@@ -176,8 +178,8 @@
             </svg>
           </div>
           <div id="img-modal-header-txt-container">
-            <h3 id="img-modal-title">Color Heightmap Grid Image</h3>
-            <span id="img-modal-description">Created usign the colors of STATES SETTINGS: 200 x 200px</span>
+            <h3 id="img-modal-title"></h3>
+            <span id="img-modal-description"></span>
           </div>
         </div>
         <div id="img-modal-img-container">
@@ -185,7 +187,7 @@
         </div>
         <div id="img-modal-buttons-container">
           <button class="sec-button" id="img-modal-cancel-btn">CANCEL</button>
-          <button class="main-button">SAVE</button>
+          <button class="main-button" id="img-modal-save-btn">SAVE</button>
         </div>
       </div>
     </div>

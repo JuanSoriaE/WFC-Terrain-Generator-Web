@@ -63,21 +63,28 @@ export default class HeightmapImage {
 
   createImage(w: number, h: number): void {
     const ALPHA: number = 255;
-    const buffer_len: number = this.N * this.M * 4;
+    const buffer_len: number = w * h * 4;
     const buffer: Uint8ClampedArray = new Uint8ClampedArray(buffer_len);
+    const scale_ratio: number = h / this.N;
     
     for (let row: number = 0; row < this.N; row++) {
       for (let col: number = 0; col < this.M; col++) {
-        let buffer_pos: number = (row * this.M + col) * 4;
+        const buffer_pos: number = scale_ratio * (row * w + col) * 4;
 
         const color: RGB = this._smooth
           ? this.getAvgColor(row, col)
           : this._colors.get(this._mat[row][col]) as RGB;
         
-        buffer[buffer_pos] = color.r;
-        buffer[buffer_pos + 1] = color.g;
-        buffer[buffer_pos + 2] = color.b;
-        buffer[buffer_pos + 3] = ALPHA;
+        for (let y: number = 0; y < scale_ratio; y++) {
+          for (let x: number = 0; x < scale_ratio; x++) {
+            const offset: number = (y * w + x) * 4;
+            
+            buffer[buffer_pos + offset] = color.r;
+            buffer[buffer_pos + offset + 1] = color.g;
+            buffer[buffer_pos + offset + 2] = color.b;
+            buffer[buffer_pos + offset + 3] = ALPHA;
+          }
+        }
       }
     }
 
