@@ -77,6 +77,7 @@ export default class Generator {
   modal_title: HTMLHeadingElement = document.getElementById("img-modal-title") as HTMLHeadingElement;
   modal_desc: HTMLSpanElement = document.getElementById("img-modal-description") as HTMLSpanElement;
   modal_img: HTMLImageElement = document.getElementById("img-modal-img") as HTMLImageElement;
+  save_imgs_button: HTMLButtonElement = document.getElementById("save-images-button") as HTMLButtonElement;
 
   rendering_cnv: HTMLCanvasElement;
 
@@ -108,10 +109,10 @@ export default class Generator {
   }
 
   async generate() {
-    this._rows = this.rows_inp.value != "" ? Number(this.rows_inp.value) : this._rows;
-    this._cols = this.cols_inp.value != "" ? Number(this.cols_inp.value) : this._cols;
+    this._rows = this.rows_inp.value !== "" ? Number(this.rows_inp.value) : this._rows;
+    this._cols = this.cols_inp.value !== "" ? Number(this.cols_inp.value) : this._cols;
     const adj_list: Map<string, Set<string>> = new Map<string, Set<string>>();
-    this._ini_cell = this.ini_cell_inp.value != "" 
+    this._ini_cell = this.ini_cell_inp.value !== "" 
       ? this.ini_cell_inp
         .value
         .split(",")
@@ -296,6 +297,7 @@ export default class Generator {
       }
 
       const img: HeightmapImage = new HeightmapImage(
+        img_settings.id,
         img_settings.title,
         img_settings.description,
         img_settings.src,
@@ -349,12 +351,12 @@ export default class Generator {
   }
   
   handleMoveDown(e: KeyboardEvent, i: number, states: Array<string>) {
-    if ((e.code != "ArrowUp" && e.code != "ArrowDown") 
-      || (i == states.length - 1  && e.code == "ArrowDown") 
-      || (i == 0 && e.code == "ArrowUp")) return;
+    if ((e.code !== "ArrowUp" && e.code !== "ArrowDown") 
+      || (i === states.length - 1  && e.code === "ArrowDown") 
+      || (i === 0 && e.code === "ArrowUp")) return;
     e.preventDefault();
   
-    const add_up: number = e.code == "ArrowUp" ? -1 : 1;
+    const add_up: number = e.code === "ArrowUp" ? -1 : 1;
     const second_idx: number = (e.target as HTMLInputElement).id.indexOf("-", 6);
     const inp_type: string = (e.target as HTMLIFrameElement).id.substring(second_idx + 1);
     
@@ -387,9 +389,9 @@ export default class Generator {
   }
 
   async handleHeightScaleChange(e: Event) {
-    if (e.type == "keypress" && (e as KeyboardEvent).code != "Enter") return;
+    if (e.type === "keypress" && (e as KeyboardEvent).code !== "Enter") return;
 
-    if (this.height_scale_right_bound.value != "") 
+    if (this.height_scale_right_bound.value !== "") 
       this._map_visualization.setMaxDisScale= Number(this.height_scale_right_bound.value);
 
     this._map_visualization._displacement_scale = Number(this.height_scale_inp.value);
@@ -426,6 +428,22 @@ export default class Generator {
     this._visualization_hold_click = false;
   }
 
+  saveImages(e: MouseEvent): void {
+    const filename: string = (document.getElementById("imgs-name") as HTMLInputElement).value;
+    if (!filename) {
+      alert("Provide a filename...");
+      (document.getElementById("imgs-name") as HTMLInputElement).focus();
+      return;
+    }
+
+    this._imgs.forEach((img, key) => {
+      const checkbox: HTMLInputElement = document.getElementById(`${key}-img-check`) as HTMLInputElement;
+      if (!checkbox.checked) return;
+
+      img.saveImage(filename);
+    });
+  }
+
   _initEventListeners() {
     this.generate_button.addEventListener("click", e => this.generate());
     this.reload_states_button.addEventListener("click", e => this.reloadStates());
@@ -441,7 +459,8 @@ export default class Generator {
     this.rendering_cnv.addEventListener("mousemove", e => this.handleMouseMove(e));
     this.rendering_cnv.addEventListener("mouseup", e => this.handleMouseUp(e));
 
-    this.rendering_cnv.addEventListener("mousedown", e => this.storeClickPos(e));
     this.rendering_cnv.addEventListener("contextmenu", e => e.preventDefault());
+
+    this.save_imgs_button.addEventListener("click", e => this.saveImages(e));
   }
 }

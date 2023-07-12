@@ -5,6 +5,7 @@ export default class HeightmapImage {
   N: number;
   M: number;
   _colors: Map<string, RGB>;
+  _id: string;
   _title: string;
   _description: string;
   _src: string;
@@ -18,7 +19,9 @@ export default class HeightmapImage {
     [-1, 1], [0, 1], [1, 1]
   ];
 
-  constructor(title: string, 
+  constructor(
+    id: string,
+    title: string, 
     description: string, 
     src: string, 
     colors: Map<string, RGB>,
@@ -27,6 +30,7 @@ export default class HeightmapImage {
     this.N = 0;
     this.M = 0;
 
+    this._id = id;
     this._title = title;
     this._description = description;
     this._src = src;
@@ -112,5 +116,18 @@ export default class HeightmapImage {
       g: g / valids,
       b: b / valids
     };
+  }
+
+  saveImage(filename: string): void {
+    const link: HTMLAnchorElement = document.createElement("a");
+    link.href = this._src;
+    link.download = `${filename}-${this._id}.jpg`;
+
+    const click_event: MouseEvent = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    link.dispatchEvent(click_event);
   }
 }
