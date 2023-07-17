@@ -1,9 +1,8 @@
 import { RGBToHex, getAutoColors, getAutoGrayColors, getHTMLColors } from "../helpers/main";
-import { ImageSettings, RGB } from "../types/types.main";
+import { ImageSettings, RGB, WFCInput } from "../types/types.main";
 import { setColorValues } from "../helpers/ux.main";
 import Heightmap3dVisualization from "../three/Heightmap3dVisualization";
 import HeightmapImage from "./HeightmapImage";
-import WFC from "../WFC/wfc.main";
 
 const IMGS_SETTINGS: Array<ImageSettings> = [
   {
@@ -53,6 +52,8 @@ export default class Generator {
   _imgs: Map<string, HeightmapImage>;
 
   _modal_img_id: string;
+
+  _wfc_worker: Worker;
 
   // HTML ELEMENTS
   ini_states_inp: HTMLInputElement = document.getElementById("ini-states") as HTMLInputElement;
@@ -110,13 +111,19 @@ export default class Generator {
 
     this._modal_img_id = "";
 
+    this._wfc_worker = new Worker(
+      new URL("../workers/worker.wfc.ts", import.meta.url),
+      {type: "module"}
+    );
+      this._initWorkersListeners();
+
     this._initStatesInputs();
     this._initImagesHTMLElements();
 
     this._initEventListeners();
   }
 
-  async generate() {
+  generate() {
     this._rows = this.rows_inp.value !== "" ? Number(this.rows_inp.value) : this._rows;
     this._cols = this.cols_inp.value !== "" ? Number(this.cols_inp.value) : this._cols;
     const adj_list: Map<string, Set<string>> = new Map<string, Set<string>>();
@@ -140,16 +147,24 @@ export default class Generator {
       
       adj_list.set(state, new Set(state_adj_list));
     }
-    
-    const res: Array<Array<Set<string>>> = await WFC(
-      this._states,
-      this._rows,
-      this._cols,
-      adj_list,
-      this._ini_cell,
-      this._ini_state,
-    );
 
+    (document.getElementById("loading-modal-container") as HTMLDivElement).style.display = "flex";
+
+    const data: WFCInput = {
+      ini_states: this._states,
+      rows: this._rows,
+      cols: this._cols,
+      adj_list: adj_list,
+      ini_cell: this._ini_cell,
+      ini_state: this._ini_state,
+      neighbors_based: this.neighbors_based_inp.checked,
+      adj_offs: [[0, -1], [1, 0], [0, 1], [-1, 0]],
+    };
+
+    this._wfc_worker.postMessage(data);
+  }
+
+  async handleWFCResult(res: Array<Array<Set<string>>>) {
     this._mat = new Array<Array<string>>(this._rows);
     
     for (let r: number = 0; r < this._rows; r++) {
@@ -158,7 +173,6 @@ export default class Generator {
         this._mat[r][c] = Array.from(res[r][c])[0];
       }
     }
-
     
     this._imgs.forEach((img, img_id) => {
       img.setMat = this._mat;
@@ -187,6 +201,8 @@ export default class Generator {
       (this._imgs.get(this.map_texture_select.value) as HeightmapImage)?.getSrc() || "",
     );
     this._map_visualization.reRender();
+
+    (document.getElementById("loading-modal-container") as HTMLDivElement).style.display = "none";
   }
 
   reloadStates(): void {
@@ -376,7 +392,7 @@ export default class Generator {
     this._modal_img_id = img_id;
     this.modal_title.textContent = img.getTitle();
     this.modal_desc.textContent = img.getDescripcion();
-    this.modal_img.src = img.getSrc();
+    this.modal_img.src = img.getSrc() || "/imgs/havent-generated.svg";
 
     this.modal_ele.style.display = "flex";
   }
@@ -477,5 +493,11 @@ export default class Generator {
 
     this.save_imgs_button.addEventListener("click", e => this.saveImages(e));
     this.moda_img_save_button.addEventListener("click", e => this.saveImages(e));
+  }
+
+  _initWorkersListeners(): void {
+    this._wfc_worker.onmessage = message => {
+      this.handleWFCResult(message.data);
+    };
   }
 }

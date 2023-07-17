@@ -1,7 +1,6 @@
 import Heap from "../types/Heap";
 import Queue from "../types/Queue";
-
-const OFFS: Array<Array<number>> = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+import { WFCInput } from "../types/types.main";
 
 let time_to_prop: number = 0;
 
@@ -14,7 +13,7 @@ let ini_state: string;
 let neigh_based: boolean;
 let adj_offs: Array<Array<number>>;
 let grid: Array<Array<Set<string>>>;
-let hp: Heap = new Heap();
+const hp: Heap = new Heap();
 
 function prebuild() {
   // Build grid
@@ -107,24 +106,15 @@ function performeWFC() {
   }
 }
 
-function WFC(
-  ini_states: Array<string>,
-  n: number,
-  m: number,
-  adj_list_param: Map<string, Set<string>>,
-  initial_cell: Array<number> = [0, 0],
-  initial_state: string,
-  neighbors_based: boolean = false,
-  adj_offs_param: Array<Array<number>> = OFFS) {
-  
-  states = new Set(ini_states);
-  N = n;
-  M = m;
-  ini_cell = initial_cell;
-  ini_state = initial_state;
-  neigh_based = neighbors_based;
-  adj_offs = adj_offs_param;
-  adj_list = adj_list_param;
+function WFC(params: WFCInput) {
+  states = new Set(params.ini_states);
+  N = params.rows;
+  M = params.cols;
+  adj_list = params.adj_list;
+  ini_cell = params.ini_cell;
+  ini_state = params.ini_state;
+  neigh_based = params.neighbors_based;
+  adj_offs = params.adj_offs;
 
   prebuild();
 
